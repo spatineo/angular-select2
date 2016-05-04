@@ -49,19 +49,28 @@ angular.module("rt.select2", [])
             restrict: "E",
             template: "<input type=\"hidden\"></input>",
             replace: true,
+            scope: {
+                validator: "&",
+                options: "=,",
+                multiple: "=",
+                placeholder: "=",
+                optionsFilter: "=",
+                ngOptions: "=",
+                mgModel: "="
+            },
             link: function (scope, element, attrs, controller) {
                 var getOptions;
 
-                var opts = angular.extend({}, defaultOptions, scope.$eval(attrs.options));
-                var isMultiple = angular.isDefined(attrs.multiple) || opts.multiple;
+                var opts = angular.extend({}, defaultOptions, scope.options);
+                var isMultiple = angular.isDefined(scope.multiple) || scope.multiple;
 
                 opts.multiple = isMultiple;
 
-                if (attrs.placeholder) {
-                    opts.placeholder = attrs.placeholder;
+                if (scope.placeholder) {
+                    opts.placeholder = scope.placeholder;
                 }
 
-                var filterOptions = $parse(attrs.optionsFilter);
+                var filterOptions = scope.optionsFilter;
 
                 // All values returned from Select2 are strings. This is a
                 // problem if you supply integer indexes: they'll become
@@ -82,9 +91,9 @@ angular.module("rt.select2", [])
                     return values;
                 }
 
-                if (attrs.ngOptions) {
+                if (scope.ngOptions) {
                     var match;
-                    if (!(match = attrs.ngOptions.match(NG_OPTIONS_REGEXP))) {
+                    if (!(match = scope.ngOptions.match(NG_OPTIONS_REGEXP))) {
                         throw new Error("Invalid ngOptions encountered!");
                     }
 
@@ -291,6 +300,12 @@ angular.module("rt.select2", [])
                         }
 
                         scope.$apply(controller.$setTouched);
+                    });
+
+                    element.on("select2-selecting", function (val) {
+                        if (scope.validator) {
+                            return scope.validator( { value:val.choice } );
+                        }
                     });
 
                     controller.$render();
