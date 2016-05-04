@@ -51,7 +51,7 @@ angular.module("rt.select2", [])
             replace: true,
             scope: {
                 validator: "&",
-                options: "=,",
+                options: "=",
                 multiple: "=",
                 placeholder: "=",
                 optionsFilter: "=",
