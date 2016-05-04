@@ -170,10 +170,13 @@ angular.module("rt.select2", [])
                     opts.query = function (query) {
                         var cb = query.callback;
                         query.callback = function (data) {
-                            for (var i = 0; i < data.results.length; i++) {
-                                var result = data.results[i];
-                                optionItems[result.id] = result;
-                            }
+                            angular.forEach(data.results, function (result) {
+                                var flattened = {};
+                                flattenSubtree(result, flattened);
+                                angular.forEach(flattened, function (value, key) {
+                                    optionItems[key] = value;
+                                });
+                            });
                             cb(data);
                         };
                         queryFn(query);
@@ -187,6 +190,20 @@ angular.module("rt.select2", [])
                             }
                         });
                     };
+                }
+
+                function flattenSubtree(node, result) {
+                    if (!result) {
+                        return;
+                    }
+                    if (node.id) {
+                        result[node.id] = node;
+                    }
+                    if (node.children && node.children.length > 0) {
+                        for (var i = 0; i < node.children.length; i++){
+                            flattenSubtree(node.children[i], result);
+                        }
+                    }
                 }
 
                 function getSelection(callback) {
